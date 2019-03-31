@@ -52,44 +52,41 @@ namespace _3SumProblem
             if (numbers.Count == 0)
                 return;
 
-            int target = 0;
             var answer = new List<Triplet>();
-            var keys = new HashSet<string>();
 
             numbers.Sort();
             int size = numbers.Count;
 
             for (var i = 0; i < size - 2; ++i) 
             {
-                var trialTriplet = new Triplet
-                {
-                    FirstNumber = numbers[i]
-                };
+                if (i > 0 && numbers[i] == numbers[i-1])
+                    continue;
 
-                int newTarget = target - trialTriplet.FirstNumber;
+                int newTarget = -numbers[i];
                 int head = i + 1;
                 int tail = size - 1;
 
                 while (head < tail)
                 {
-                    trialTriplet.SecondNumber = numbers[head];
-                    trialTriplet.ThirdNumber = numbers[tail];
-
-                    int twoSumValue = trialTriplet.SecondNumber + trialTriplet.ThirdNumber;
+                    int twoSumValue = numbers[head] + numbers[tail];
 
                     if (twoSumValue == newTarget)
                     {
-                        string key = GetKey(trialTriplet);
+                        answer.Add(new Triplet()
+                            {
+                                FirstNumber = numbers[i],
+                                SecondNumber = numbers[head],
+                                ThirdNumber = numbers[tail]
+                            }
+                        );
+                        while (head < tail && numbers[head] == numbers[head+1])
+                            ++head;
 
-                        if (!keys.Contains(key))
-                        {
-                            keys.Add(key);
-                            answer.Add(trialTriplet);
-                        }
-
-                        head++;
-                        tail--;
-
+                        while (head < tail && numbers[tail] == numbers[tail-1])
+                            --tail;
+                        
+                        ++head;
+                        --tail;
                     }
                     else if (twoSumValue > newTarget)
                     {
