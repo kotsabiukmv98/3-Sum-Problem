@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.CommandWpf;
 using Microsoft.Win32;
@@ -16,23 +17,21 @@ namespace _3SumProblem
         {
             LoadInput = new RelayCommand(ExecuteLoadInput);
             SaveOutput = new RelayCommand(ExecuteSaveOutput);
+            ShowAboutWindow = new RelayCommand(ExecuteShowAboutWindow);
         }
 
         public ICommand LoadInput { get; private set; }
         public ICommand SaveOutput { get; private set; }
+        public ICommand ShowAboutWindow { get; private set; }
 
+        /// <summary>
+        /// Represents answer for problem
+        /// </summary>
         public IList<Triplet> Answer { get; private set; } = new BindingList<Triplet>();
-        private string _inputText = "";
-        public string InputText
-        {
-            get => _inputText;
-            set
-            {
-                _inputText = value;
-                OnPropertyChanged();
-            }
-        }
-        private bool _canSaveToFile = false;//Set here false;
+       
+        /// <summary>
+        /// Shows is solution ready or not
+        /// </summary>
         public bool CanSaveToFile
         {
             get => _canSaveToFile;
@@ -42,77 +41,50 @@ namespace _3SumProblem
                 OnPropertyChanged();
             }
         }
+        private string _inputText = "";
+        private bool _canSaveToFile = false;
 
-        private void ExecuteLoadInput()
+        private void Solve(string input)
         {
-            var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Text files (*.txt)|*.txt";
-            if (openFileDialog.ShowDialog() == true)
-            {
-                var filePath = openFileDialog.FileName;
-                InputText = File.ReadAllText(filePath);
-                solve(InputText);
-            }
-        }
 
-        private void solve(string input)
-        {
-            var separator = new string[1] {","};
-            var stringNumbers = input.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            var intNumbers = new List<int>(stringNumbers.Length);
-            foreach (var number in stringNumbers)
-            {
-                if (int.TryParse(number, out var num))
-                {
-                    intNumbers.Add(num);
-                }
-            }
+            var numbers = ReadInput(input);
 
-            if (intNumbers.Count == 0)
+            if (numbers.Count == 0)
                 return;
 
             int target = 0;
             var answer = new List<Triplet>();
             var keys = new HashSet<string>();
 
-            intNumbers.Sort();
-            int size = intNumbers.Count;
+            numbers.Sort();
+            int size = numbers.Count;
 
-            for (int i = 0; i < size - 2; ++i) 
+            for (var i = 0; i < size - 2; ++i) 
             {
-                int[] trialTriplet = new int[3];
-                trialTriplet[0] = intNumbers[i];
+                var trialTriplet = new Triplet
+                {
+                    FirstNumber = numbers[i]
+                };
 
-                int newTarget = target - trialTriplet[0];
+                int newTarget = target - trialTriplet.FirstNumber;
                 int head = i + 1;
                 int tail = size - 1;
 
                 while (head < tail)
                 {
-                    trialTriplet[1] = intNumbers[head];
-                    trialTriplet[2] = intNumbers[tail];
+                    trialTriplet.SecondNumber = numbers[head];
+                    trialTriplet.ThirdNumber = numbers[tail];
 
-                    int twoSumValue = trialTriplet[1] + trialTriplet[2];
+                    int twoSumValue = trialTriplet.SecondNumber + trialTriplet.ThirdNumber;
 
                     if (twoSumValue == newTarget)
                     {
-                        string key = getKey(trialTriplet, 3);
+                        string key = GetKey(trialTriplet);
 
                         if (!keys.Contains(key))
                         {
                             keys.Add(key);
-
-                            IList<int> triplet = new List<int>();
-
-                            for (int j = 0; j < 3; j++)
-                                triplet.Add(trialTriplet[j]);
-
-                            answer.Add(new Triplet()
-                            {
-                                FirstNumber = triplet[0],
-                                SecondNumber = triplet[1],
-                                ThirdNumber = triplet[2]
-                            });
+                            answer.Add(trialTriplet);
                         }
 
                         head++;
@@ -134,23 +106,46 @@ namespace _3SumProblem
             CanSaveToFile = true;
             OnPropertyChanged($"Answer");
         }
-        private static string getKey(int[] arr, int len)
+        private string GetKey(Triplet triplet)
         {
-            string key = "";
-
-            for (int j = 0; j < 3; j++)
-            {
-                key += arr[j].ToString();
-                key += ",";
-            }
-
+            string key = $"{triplet.FirstNumber.ToString()},{triplet.SecondNumber.ToString()}," +
+                         $"{triplet.ThirdNumber.ToString()}";
             return key;
         }
+        private List<int> ReadInput(string input)
+        {
+            var separator = new string[1] { "," };
+            var stringNumbers = input.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            var intNumbers = new List<int>(stringNumbers.Length);
+            foreach (var number in stringNumbers)
+            {
+                if (int.TryParse(number, out var num))
+                {
+                    intNumbers.Add(num);
+                }
+            }
 
+            return intNumbers;
+        }
+        private void ExecuteLoadInput()
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Text files (*.txt)|*.txt"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                var filePath = openFileDialog.FileName;
+                _inputText = File.ReadAllText(filePath);
+                Solve(_inputText);
+            }
+        }
         private void ExecuteSaveOutput()
         {
-            var saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Text file(*.txt)| *.txt";
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Text file(*.txt)| *.txt"
+            };
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -164,8 +159,23 @@ namespace _3SumProblem
             }
                 
         }
+        private void ExecuteShowAboutWindow()
+        {
+            var message = "Your can open file that have input data. " +
+                          "It should be .txt file with integers number separated by comma. For example:\n10,4,-3,0,4-1,21\n" + 
+                          "And after that you can save solution to file.";
+            MessageBox.Show( message, "About");
+        }
 
+        /// <summary>
+        /// Fires whether property change value
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Property changed event handler
+        /// </summary>
+        /// <param name="propertyName"></param>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

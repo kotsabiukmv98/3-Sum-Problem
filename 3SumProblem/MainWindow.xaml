@@ -11,15 +11,26 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu VerticalAlignment="Top" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="Open file..." Command="{Binding LoadInput}"/>
+                <MenuItem Header="Save to file..." IsEnabled="{Binding CanSaveToFile}" Command="{Binding SaveOutput}"/>
+            </MenuItem>
+            <MenuItem Header="About" Command="{Binding ShowAboutWindow}"/>
+        </Menu>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                    Grid.Row="0" Grid.Column="0">
+                    Grid.Row="1" Grid.Column="0">
             <Button Width="250" Height="100" FontSize="30" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Margin="0 70 0 70" Content="Load input" Command="{Binding LoadInput}"/>
+                    VerticalAlignment="Center" Margin="0 60 0 70" Content="Load input" Command="{Binding LoadInput}"/>
 
             <Button Width="250" FontSize="30" Height="100" Content="Save to file"
                     Command="{Binding SaveOutput}" IsEnabled="{Binding CanSaveToFile}"/>
         </StackPanel>
-        <DockPanel Grid.Row="0" Grid.Column="1">
+        <DockPanel Grid.Row="1" Grid.Column="1">
             <TextBlock DockPanel.Dock="Top" FontSize="30" HorizontalAlignment="Center" Margin="0 10 0 10" Text="Answer will appear here:"/>
 
             <ListBox ItemsSource="{Binding Answer, Mode=OneWay}" HorizontalAlignment="Stretch" FontSize="30" BorderThickness="0">
