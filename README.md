@@ -4,6 +4,11 @@ WPF desktop application that solves 3-sum-problem. You can easy load input file,
 ## Clone Repo
 ```git clone https://github.com/kotsabiukmv98/3-Sum-Problem.git```
 
+## Algorithm Complexity
+
+Time - O(n^2)  
+Memory - O(1)
+
 ## Start Program
 For starting program you need build it and run. Or you can just unzip [Release.7z](https://github.com/kotsabiukmv98/3-Sum-Problem/blob/master/Release.7z) file with .exe file and one input file.
 
