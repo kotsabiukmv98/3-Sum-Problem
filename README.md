@@ -2,7 +2,7 @@
 WPF desktop application that solves 3-sum-problem. You can easy load input file, see result in program UI and save answer to .txt file.
 
 ## Clone Repo
-```git clone https://github.com/kotsabiukmv98/3-Sum-Problem.git```
+```git clone https://github.com/mkotsabiuk/3-Sum-Problem.git```
 
 ## Algorithm Complexity
 
